@@ -1,2 +1,4 @@
 cache
-.data_cache/user_groups
+.data_cache
+**/__pycache__
+.ipynb_checkpoints
