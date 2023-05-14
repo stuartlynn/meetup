@@ -14,6 +14,7 @@ from meetup.server import start_server
 from pathlib import Path
 import typer
 import json
+import webbrowser
 
 from meetup import __app_name__, __version__
 
@@ -44,6 +45,7 @@ def visualize(
 ) -> None:
     RunCache.set_run_name(run_name)
     logInfo("Starting Server at http://localhost:8000/")
+    webbrowser.open("http://localhost:8000")
     start_server(run_name)
 
 
