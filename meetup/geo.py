@@ -110,5 +110,6 @@ def generate_cluster_convex_hull(df:GeoDataFrame, groupBy:str="label", geometryC
     :param str groupBy: The key to use in the groupby query 
     :param str geometryCol: The geometry column to use 
     """
-    hulls= df.groupby(groupBy).apply(lambda group: gp.GeoSeries(MultiPoint(group[geometryCol]).convex_hull)).rename(columns={0:geometryCol}).reset_index(drop=True)
+    hulls= df.groupby(groupBy).apply(lambda group: gp.GeoSeries(MultiPoint(list(group[geometryCol])).convex_hull))
+    hulls = hulls.rename(columns={0:geometryCol})
     return gp.GeoDataFrame(hulls, crs=df.crs)
