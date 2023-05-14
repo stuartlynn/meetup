@@ -25,8 +25,8 @@ export const ClusterSizeHistogram: React.FC = () => {
         animated
         rawData={Object.values(clusterSizes)}
       />
-      <XAxis />
-      <YAxis />
+      <XAxis axisStyle={{ storke: "white" }} />
+      <YAxis axisStyle={{ stroke: "white" }} />
     </Histogram>
   )
 }

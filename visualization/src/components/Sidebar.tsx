@@ -14,7 +14,14 @@ export const Sidebar: React.FC = () => {
 
   const groupItems = groupIds.map(g => ({ id: `${g}`, name: `${g}` }))
   return (
-    <div style={{ width: "400px", height: "95vh", top: "2.5vh", left: "20px", position: 'absolute', zIndex: 1, backgroundColor: "white", boxSizing: "border-box", padding: "10px", boxShadow: "1px 1px 26px 2px rgba(0,0,0,0.75)" }}>
+    <div
+      className="overlay"
+      style={{
+        width: "400px",
+        height: "95vh",
+        top: "2.5vh",
+        left: "20px",
+      }}>
       <Flex direction="column" gap="size-200">
         <RunDetails />
         <Divider size="M" orientation='horizontal' />

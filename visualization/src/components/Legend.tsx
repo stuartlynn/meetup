@@ -28,7 +28,13 @@ const Line: React.FC<{ size: number, color: Array<number> }> = ({ size, color })
 
 export const Legend: React.FC = () => {
   return (
-    <div style={{ width: "200px", height: "150px", bottom: "2.5vh", right: "20px", position: 'absolute', zIndex: 1, backgroundColor: "white", boxSizing: "border-box", padding: "10px", boxShadow: "1px 1px 26px 2px rgba(0,0,0,0.75)" }}>
+    <div className="overlay"
+      style={{
+        width: "200px",
+        height: "150px",
+        bottom: "2.5vh",
+        right: "20px"
+      }}>
       <Flex direction="column" gap="size-100">
         <Heading>Legend</Heading>
         <Flex direction="row" justifyContent={"space-between"} alignItems={'center'}>
