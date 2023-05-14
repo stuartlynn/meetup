@@ -3,11 +3,11 @@ import pandas as pd
 import geopandas as gp
 import numpy as np
 from typing import Optional
-from meetup.geo import generate_group_centroids, get_network_graph, snap_points_to_street_network, find_landmarks_near_centroids
+from meetup.geo import generate_group_centroids, get_network_graph, snap_points_to_street_network
 from meetup.logging import logInfo, logWarning
-from rich.progress import track
 from meetup.caching import RunCache 
 from enum import Enum
+from sklearn.neighbors import KDTree
 
 from sklearn.cluster import KMeans, AffinityPropagation
 
@@ -20,8 +20,7 @@ class MeetingPointMethod(str,Enum):
     LANDMARK: Try to find landmarks close the centroid to use as the meeting spot
     """
     CENTROID="centroid",
-    CENTROID_SNAPED_TO_STREET="centroid_snapped_to_street",
-    LANDMARK="landmark"
+    CENTROID_SNAPED_TO_STREET="centroid_snapped_to_street"
 
 
 def cluster(clusterAlgo, df: gp.GeoDataFrame)->gp.GeoDataFrame:
@@ -47,13 +46,59 @@ def merge_clusters(df: gp.GeoDataFrame, minOccupancy: int):
     param GeoDataFrame df: The DataFrame to perform meges on 
     return GeoDataFrame: The resulting DataFrame with the clusters merged
     """
-    cluster_value_counts = df.label.value_counts()
-    clusters_to_merge = cluster_value_counts[cluster_value_counts>40].index
 
-    # for cluster_label_to_merge in clusters_to_merge:
-    #     cluster = df[df.label==cluster_label_to_merge]
+    # Get a list of clusters that dont meet our min occupancy limit 
+    clusterValueCounts = df.label.value_counts()
+    clustersToMerge = clusterValueCounts[clusterValueCounts<minOccupancy].index
+
+    # Generate the centroids for the clusters 
+    clusterCentroids = generate_group_centroids(df).set_index('label') 
+    centroidCoords = [ [geom.x,geom.y] for geom in  clusterCentroids.geometry] 
+
+    # Build a KDTree using the cluster centroids 
+    tree = KDTree(centroidCoords)
+
+    # Build a lookup to easily map between the tree indexes and the labels
+    treeToFrameLookup = dict(zip(range(len(centroidCoords)), list(clusterCentroids.index)))
+
+    # Keep track of the clusters we have merged already this iteration so we can exclude them from
+    # future merge attempts 
+
+    clustersNotToConsider = []
+
+    # Keep track of the mappings of mergers
+    mergers={}
+
+    for clusterLabelToMerge in clustersToMerge:
+        if(clusterLabelToMerge in clustersNotToConsider):
+           continue 
+
+        clusterCentroid =  centroidCoords[list(clusterCentroids.index).index(clusterLabelToMerge)]
+        distances , potentialMerges = tree.query([clusterCentroid], 4)
+        potentialMergerLabels= [treeToFrameLookup[index] for index in potentialMerges[0]]
+
+        # Filter the poetnital mergers to exclude self and things that have already been merged this turn 
+        potentialMergerLabels = [label for label in potentialMergerLabels if label != clusterLabelToMerge and not label in clustersNotToConsider ]
+
+
+        if(len(potentialMergerLabels)==0):
+            continue
+
+        # Get the sizes of the potental mergers 
+        potentialMergerSizes = clusterValueCounts.loc[potentialMergerLabels]
+        # Select the smallest 
+        smallestAvaliableCluster = potentialMergerSizes.idxmin()
         
-    return df
+        # Use this as the merge target
+        mergers[clusterLabelToMerge] = smallestAvaliableCluster
+        
+        # Record both the current cluster and the merge in the exclusing list  
+        clustersNotToConsider.append(clusterLabelToMerge)
+        clustersNotToConsider.append(smallestAvaliableCluster)
+
+    # Perform the merges
+    df["label"] = df["label"].apply(lambda label : mergers[label] if  label in mergers else label)
+    return df  
 
 
 def improve_clusters(df, minOccupancy: Optional[int], maxOccupancy: Optional[int], maxIters:int =10)->gp.GeoDataFrame:
@@ -69,7 +114,7 @@ def improve_clusters(df, minOccupancy: Optional[int], maxOccupancy: Optional[int
 
     """
     improvedClusters = df.copy()
-    for _ in track(range(0,maxIters), description="Trying to make clusters better by merging and splitting"):
+    for iteration in range(0,maxIters):
         if(maxOccupancy is not None):
             improvedClusters = split_clusters(improvedClusters, maxOccupancy)
 
@@ -80,6 +125,12 @@ def improve_clusters(df, minOccupancy: Optional[int], maxOccupancy: Optional[int
 
         allClustersOverMinOccupancy=  True if minOccupancy is None  else  (cluster_counts >= minOccupancy).all()  
         allClustersUndexMaxOccupancy= True if maxOccupancy is None  else  (cluster_counts <= maxOccupancy).all() 
+
+        numberUnderThreshold = (cluster_counts <minOccupancy).sum()
+        numberOverThreshold= (cluster_counts  > maxOccupancy).sum()
+
+        logInfo(f"After {iteration+1} iterations, we have {numberUnderThreshold} clusters smaller min and {numberOverThreshold} larger than max")
+        
 
         if(allClustersOverMinOccupancy and allClustersUndexMaxOccupancy):
             logInfo("🎉 We succesfully managed to tame the groups!")
@@ -149,9 +200,6 @@ def generate_group_meeting_points(df: gp.GeoDataFrame, method: Optional[MeetingP
             bounds = df.to_crs("epsg:4326").total_bounds
             network = get_network_graph(tuple(bounds),crs=df.crs)
             return snap_points_to_street_network(group_centroids, network) 
-        case MeetingPointMethod.LANDMARK:
-            logInfo("Generating meeting points for each group by finding landmarks near the centroid")
-            return find_landmarks_near_centroids(group_centroids)
 
 
 def format_results(users:gp.GeoDataFrame, meetingPoints: gp.GeoDataFrame)->pd.DataFrame:
