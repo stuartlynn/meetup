@@ -1,5 +1,6 @@
 import { selector } from "recoil";
 import { selectedGroupAtom } from "./InterfaceStore";
+//@ts-ignore
 import bbox from '@turf/bbox'
 
 
@@ -24,21 +25,31 @@ export const meetingPointsSelector = selector({
   }
 })
 
+export const clusterSizesSelector = selector({
+  key: "clusterSizesSelector",
+  get: ({ get }) => {
+    let users = get(usersSelector)
+    return users.features.reduce((counts: Record<number, number>, user: any) => {
+      let label = user.properties.label
+      counts[label] = label in counts ? counts[label] + 1 : 1
+      return counts
+    }, {})
+  }
+})
+
+
+export const runDetailsSelector = selector({
+  key: "runDetails",
+  get: async () => {
+    return await fetch("/data/run_details.json").then(resp => resp.json())
+  }
+})
+
 export const boundsSelector = selector<[[number, number], [number, number]]>({
   key: "bounds",
   get: async ({ get }) => {
     let users = get(usersSelector)
     return bbox(users)
-    // let bounds = users.features.reduce((bounds: [number, number, number, number], feature: any) => {
-    //   const coords = feature.geometry.coordinates
-    //   return [
-    //     Math.min(bounds[0], coords[0]),
-    //     Math.max(bounds[1], coords[0]),
-    //     Math.min(bounds[2], coords[1]),
-    //     Math.max(bounds[3], coords[1]),
-    //   ]
-    // }, [180, -180, 90, -90])
-    // return [[bounds[0], bounds[2]], [bounds[1], bounds[3]]]
   }
 })
 
@@ -57,7 +68,6 @@ export const maxMinLabelsSelector = selector<[number, number]>({
     return [Math.min(...groupIds), Math.max(...groupIds)]
   }
 })
-
 
 export const selectedGroupDetailsSelector = selector({
   key: 'selectedGroupDetails',

@@ -5,14 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && cp dist/* meetup/interactive_viz_template/",
+    "build": "tsc && vite build && cp -r dist/* ../meetup/interactive_viz_template/",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
   "dependencies": {
     "@adobe/react-spectrum": "^3.26.0",
-    "@nivo/bar": "^0.83.0",
-    "@nivo/core": "^0.83.0",
+    "@turf/bbox": "^6.5.0",
     "deck.gl": "^8.9.15",
     "maplibre-gl": "^2.4.0",
     "react": "^18.2.0",

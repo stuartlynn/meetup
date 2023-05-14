@@ -13,7 +13,10 @@ export const SelectedGroupInfo: React.FC = () => {
       <Header>Group has {selectedGroupDetails.users.length} Users</Header>
       <div style={{ height: "200px", overflowY: "auto" }}>
         <ListBox>
-          {userItems.map((item: any) => <Item id={item.id}>{item.label}</Item>)}
+          {userItems.map((item: any) =>
+            //@ts-ignore
+            <Item id={item.id}>{item.label}</Item>
+          )}
         </ListBox>
       </div>
     </div >

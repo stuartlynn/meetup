@@ -1,11 +1,11 @@
 import { atom } from "recoil";
 
-export const mapViewport = atom({
+export const mapViewport = atom<Record<string, any>>({
   key: "mapview",
   default: {
-    latitude: 0,
-    longitude: 0,
-    zoom: 0
+    latitude: 52.503797177988844,
+    longitude: 13.299512588353677,
+    zoom: 8.696205280855345
   },
   dangerouslyAllowMutability: true
 })
