@@ -2,9 +2,10 @@ from typing import Optional
 from typing_extensions import Annotated
 from meetup.geo import  load_user_locations 
 from meetup.clustering import MeetingPointMethod, generate_group_meeting_points, run_clustering, format_results
-from meetup.vis import generate_report
+from meetup.geo import generate_cluster_convex_hull
 from meetup.logging import logInfo
 from meetup.caching import RunCache
+from meetup.server import start_server 
 from pathlib import Path
 import typer 
 
@@ -18,6 +19,16 @@ def clear(
     )->None:
     RunCache.set_run_name(run_name)
     RunCache.clear_cache()
+
+app = typer.Typer()
+@app.command()
+def visualize(
+    run_name: Annotated[str,typer.Argument(help ="The output name for this run. Once the script has run you will find your results in {run_name}/results.csv and if visualization is requested {run_name}/outputname.png")],
+    )->None:
+    RunCache.set_run_name(run_name)
+    logInfo("Starting Server at http://localhost:8000/")
+    start_server(run_name)
+    
 
 @app.command()
 def run(
@@ -44,9 +55,6 @@ def run(
     meeting_point_method: Annotated[Optional[MeetingPointMethod], typer.Option(
         help="Meeting point method, one of 'centroid', 'centroid_snapped_to_street_network or landmark"
         )] = MeetingPointMethod.CENTROID,
-    visualize_results: Annotated[bool, typer.Option(
-        help="Visualize results"
-        )] = False,
     ) -> None: 
         logInfo(f"[bold yellow]💾[/bold yellow] Generating groups for input file [bold white]{user_locations}[/bold white]")
 
@@ -66,11 +74,13 @@ def run(
 
         groupAssignments = run_clustering(locations, min_occupancy, max_occupancy, max_optomization_iterations)
         groupMeetingPoints = generate_group_meeting_points(groupAssignments, meeting_point_method) 
+        groupRegions = generate_cluster_convex_hull(groupAssignments)
+
+        groupAssignments.to_crs("epsg:4326").to_file(outputDir / "usersAssignments.geojson", driver="GeoJSON")
+        groupMeetingPoints.to_crs("epsg:4326").to_file(outputDir / "groupMeetingPoints.geojson", driver="GeoJSON")
+        groupRegions.to_crs("epsg:4326").to_file(outputDir / "groupRegions.geojson", driver="GeoJSON")
+
+        
         results = format_results(groupAssignments, groupMeetingPoints)
-         
         results.to_csv(outputDir / "results.csv", index=False)
-
-        if visualize_results:
-            generate_report(results, outputDir / "report.index")
-
 
