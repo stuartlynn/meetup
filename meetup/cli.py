@@ -13,7 +13,7 @@ from meetup.caching import RunCache
 from meetup.server import start_server
 from pathlib import Path
 import typer
-
+import json
 
 from meetup import __app_name__, __version__
 
@@ -31,9 +31,6 @@ def clear(
 ) -> None:
     RunCache.set_run_name(run_name)
     RunCache.clear_cache()
-
-
-app = typer.Typer()
 
 
 @app.command()
@@ -144,4 +141,16 @@ def run(
     )
 
     results = format_results(groupAssignments, groupMeetingPoints)
-    results.to_csv(outputDir / "results.csv", index=False)
+    results.to_csv(outputDir / "mailing_list.csv", index=False)
+
+    with open(outputDir / "run_details.json", "w") as file:
+        json.dump(
+            {
+                "minOccupancy": min_occupancy,
+                "maxOccupancy": max_occupancy,
+                "maxIters": max_optomization_iterations,
+                "meetingPointMethod": meeting_point_method,
+                "name": run_name,
+            },
+            file,
+        )
