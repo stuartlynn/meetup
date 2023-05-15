@@ -41,7 +41,7 @@ export const clusterSizesSelector = selector({
 export const runDetailsSelector = selector({
   key: "runDetails",
   get: async () => {
-    return await fetch("/data/run_details.json").then(resp => resp.json())
+    return await fetch("/data/runDetails.json").then(resp => resp.json())
   }
 })
 
