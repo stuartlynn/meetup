@@ -1,16 +1,16 @@
 from typing import Optional
 from typing_extensions import Annotated
-from meetup.geo import load_user_locations
-from meetup.clustering import (
+from .geo import load_user_locations
+from .clustering import (
     MeetingPointMethod,
     generate_group_meeting_points,
     run_clustering,
     format_results,
 )
-from meetup.geo import generate_cluster_convex_hull
-from meetup.logging import logInfo
-from meetup.caching import RunCache
-from meetup.server import start_server
+from .geo import generate_cluster_convex_hull
+from .logging import logInfo
+from .caching import RunCache
+from .server import start_server
 from pathlib import Path
 import typer
 import json
@@ -143,9 +143,9 @@ def run(
     )
 
     results = format_results(groupAssignments, groupMeetingPoints)
-    results.to_csv(outputDir / "mailing_list.csv", index=False)
+    results.to_csv(outputDir / "mailingList.csv", index=False)
 
-    with open(outputDir / "run_details.json", "w") as file:
+    with open(outputDir / "runDetails.json", "w") as file:
         json.dump(
             {
                 "minOccupancy": min_occupancy,

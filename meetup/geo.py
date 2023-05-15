@@ -6,9 +6,9 @@ from typing import Optional
 from geopandas import GeoDataFrame
 from networkx import MultiDiGraph
 from shapely import MultiPoint
-from meetup.logging import logInfo, logWarning
+from .logging import logInfo, logWarning
 from collections.abc import Iterable
-from meetup.caching import RunCache
+from .caching import RunCache
 
 
 def clean_user_locations(userLocations: pd.DataFrame) -> pd.DataFrame:
@@ -114,10 +114,6 @@ def generate_group_centroids(clusteredUsers: gp.GeoDataFrame) -> gp.GeoDataFrame
         .reset_index()
     )
     return centroids.set_crs(clusteredUsers.crs)
-
-
-def find_landmarks_near_centroids(centroids: gp.GeoDataFrame) -> gp.GeoDataFrame:
-    return gp.GeoDataFrame(centroids, crs=centroids.crs)
 
 
 def get_network_graph(

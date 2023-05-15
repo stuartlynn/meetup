@@ -3,13 +3,13 @@ import pandas as pd
 import geopandas as gp
 import numpy as np
 from typing import Optional
-from meetup.geo import (
+from .geo import (
     generate_group_centroids,
     get_network_graph,
     snap_points_to_street_network,
 )
-from meetup.logging import logInfo, logWarning
-from meetup.caching import RunCache
+from .logging import logInfo, logWarning
+from .caching import RunCache
 from enum import Enum
 from sklearn.neighbors import KDTree
 
@@ -88,7 +88,7 @@ def merge_clusters(df: gp.GeoDataFrame, minOccupancy: int):
         clusterCentroid = centroidCoords[
             list(clusterCentroids.index).index(clusterLabelToMerge)
         ]
-        distances, potentialMerges = tree.query([clusterCentroid], 4)
+        _, potentialMerges = tree.query([clusterCentroid], min(4, clusterCentroids.shape[0]))
         potentialMergerLabels = [
             treeToFrameLookup[index] for index in potentialMerges[0]
         ]
@@ -263,7 +263,7 @@ def format_results(
     latLngMeetingPoints = meetingPoints.to_crs("epsg:4326")
     latLngMeetingPoints = latLngMeetingPoints.assign(
         start_point_latitude=latLngMeetingPoints.geometry.y,
-        start_point_longitude=latLngMeetingPoints.geometry.y,
+        start_point_longitude=latLngMeetingPoints.geometry.x,
     )
 
     groupAssignments = (
@@ -317,9 +317,10 @@ def run_clustering(
 
     # Step 2 : If bounds for the cluster sizes specified, iteratively try to improve the clusters based on min and max group occupancy
     if minGroupOccupancy is not None or maxGroupOccupancy is not None:
-        logInfo(f"Refining groups to try and get them within the specified range.")
+        iterations = maxIters if maxIters is not None else 10
+        logInfo(f"Refining groups to try and get them within the specified range. Will run {iterations} times")
         reduced_clusters = improve_clusters(
-            inital_clusters, minGroupOccupancy, maxGroupOccupancy
+            inital_clusters, minGroupOccupancy, maxGroupOccupancy, iterations 
         )
         return reduced_clusters
 

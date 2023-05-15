@@ -1,7 +1,7 @@
 from pathlib import Path
 import shutil
 import joblib
-from meetup.logging import logInfo
+from .logging import logInfo
 from networkx import MultiDiGraph
 import geopandas as gp
 
@@ -51,6 +51,7 @@ class Cache:
     def get_network(self, file: str) -> MultiDiGraph | None:
         filePath = self._run_dir() / file
         if filePath.exists() and filePath.is_file():
+            logInfo("Loading network from local cache")
             return joblib.load(filePath)
         else:
             return None
