@@ -30,7 +30,7 @@ Though not stated in the initial problem statement I am making the following ass
 3. The meeting point should be equally distant to most people in the group 
 4. The meeting point should be somewhere on the street, for example it should not be in a lake or building.
 5. We don't want groups to be too big as this might lead to huge numbers of people coming together for the activity 
-6. We don't want groups to be too small as not everyone is going to show up so we dont want people to end up alone
+6. We don't want groups to be too small as not everyone is going to show up so we don't want people to end up alone
 7. The run time of the script doesn't matter too much. This is a task that will be run once and a while rather than all the time. So while we don't want it to take forever it is probably ok if it runs for a few minutes. 
 
 ## Approach 
@@ -114,7 +114,8 @@ generate physically smaller groups while keeping group occupancies high enough t
 which users will actually have to travel. For 9000 users calculating their distance from each other across the network can get computationally expensive fast. There might be 
 a way to do this though where we set a euclidean threshold and only calculate road network distances for pairs within that threshold and assign pairs which are outside that 
 threshold an arbitrary large distance to disqualify them in the clustering algorithm. 
-4. While we can snap the meeting points to the grid
+4. While we can snap the meeting points to the road network to ensure that they are accessible by bike, they are still just random points. It would be great if we could pick 
+something more meaningful like landmarks for the meeting points.
 
 ### Areas for improvement 
 Some ways I would love to improve the solution if given more time 
@@ -124,6 +125,8 @@ Some ways I would love to improve the solution if given more time
 could be done using a POI database or something like the OSM Overpass API. It would give users something a bit more concrete than a lat lng pair 
 to meet at.
 3. It would be great to flesh out the visualisation tool a little more to allow a user to manually split and join groups together. As good as clustering can be, there is no substitute for human knowledge and intuition. 
+4. There are a few typing issues with geopandas that mean that there are some type errors, esp around the to\_crs function. Would love to resolve these
+5. More testing. I have tests in place for most of the core functions but it would be good to get some more coverage and a few integration tests in there
 
 
 ## Sample output 
