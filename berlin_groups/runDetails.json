@@ -1,0 +1,1 @@
+{"minOccupancy": 10, "maxOccupancy": 40, "maxIters": null, "meetingPointMethod": "centroid_snapped_to_street", "name": "berlin_groups"}
