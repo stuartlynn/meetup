@@ -94,7 +94,7 @@ export const MapView: React.FC = () => {
         mapLib={maplibregl}
         mapStyle={"https://api.maptiler.com/maps/topo-v2/style.json?key=32rtUQVfWVrA5316PfSR"}
       >
-        <NavigationControl position="top-left" />
+        <NavigationControl position="top-right" />
       </Map>
     </DeckGL>
   )
