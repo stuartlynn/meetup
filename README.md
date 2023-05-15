@@ -2,13 +2,13 @@
 
 Meetup is a small command line utility aimed at generating groups of spatially close users who can go on shared adventures together.
 
-- [Problem Statement](#problem_statement)
+- [Problem Statement](#problem-statement)
 - [Approach](#approach)
-- [Sample Output](#sample_output)
-- [Installing Dependencies](#installing_dependencies)
-- [Running Tests](#running_tests)
-- [Running The Tool](#running_the_tool)
-- [Visualising the results](#visualzing_the_results)
+- [Sample Output](#sample-output)
+- [Installing Dependencies](#installing-dependencies)
+- [Running Tests](#running-tests)
+- [Running The Tool](#running-the-tool)
+- [Visualising the results](#visualising-the-results)
 
 ![viztool](images/vistool.png)
 
@@ -134,7 +134,7 @@ Included in this repo is the [berlin\_groups](berlin_groups) folder which contai
 poetry run python -m meetup run  data/tours.csv berlin_groups --max-occupancy=40 --min-occupancy=10 --meeting-point-method=centroid_snapped_to_street 
 ```
 
-The file for the newsletter is in that folder here: [newsletter.csv](berlin_groups/newsletter.csv)
+The file for the newsletter is in that folder here: [newsletter.csv](berlin_groups/newsLetter.csv)
 
 The results can also be viewed with the following command 
 
@@ -228,7 +228,7 @@ To see a full list of parameters for the run command do
 poetry run -m meetup run --help
 ```
 
-![meetupcommands](images/vistool.png)
+![meetupcommands](images/meetup_commands.png)
 
 
 ## Visualising the results 
