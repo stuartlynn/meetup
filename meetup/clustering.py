@@ -88,7 +88,9 @@ def merge_clusters(df: gp.GeoDataFrame, minOccupancy: int):
         clusterCentroid = centroidCoords[
             list(clusterCentroids.index).index(clusterLabelToMerge)
         ]
-        _, potentialMerges = tree.query([clusterCentroid], min(4, clusterCentroids.shape[0]))
+        _, potentialMerges = tree.query(
+            [clusterCentroid], min(4, clusterCentroids.shape[0])
+        )
         potentialMergerLabels = [
             treeToFrameLookup[index] for index in potentialMerges[0]
         ]
@@ -318,9 +320,11 @@ def run_clustering(
     # Step 2 : If bounds for the cluster sizes specified, iteratively try to improve the clusters based on min and max group occupancy
     if minGroupOccupancy is not None or maxGroupOccupancy is not None:
         iterations = maxIters if maxIters is not None else 10
-        logInfo(f"Refining groups to try and get them within the specified range. Will run {iterations} times")
+        logInfo(
+            f"Refining groups to try and get them within the specified range. Will run {iterations} times"
+        )
         reduced_clusters = improve_clusters(
-            inital_clusters, minGroupOccupancy, maxGroupOccupancy, iterations 
+            inital_clusters, minGroupOccupancy, maxGroupOccupancy, iterations
         )
         return reduced_clusters
 
