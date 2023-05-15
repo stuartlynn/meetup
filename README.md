@@ -136,6 +136,12 @@ poetry run python -m meetup run  data/tours.csv berlin_groups --max-occupancy=40
 
 The file for the newsletter is in that folder here: [newsletter.csv](berlin_groups/newsletter.csv)
 
+The results can also be viewed with the following command 
+
+```bash
+poetry run python -m meetup visualize berlin_groups
+```
+
 ## Installing dependencies 
 We are using [poetry](https://python-poetry.org/) for dependency management on this project. 
 To install dependencies, make sure you have poetry installed and then run 
